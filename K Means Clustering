@@ -1,0 +1,72 @@
+#This is the example code for K-Means Clustering
+# Prepared by Dr. Amir Esmaeily
+# For your CA2
+###################################################
+
+install.packages("tidyverse")
+remove.packages("rlang")
+install.packages("rlang")
+install.packages("cluster")
+install.packages("factoextra")
+install.packages("gridExtra")
+library(tidyverse)
+library(rlang)
+library(cluster)
+library(ggplot2)
+library(factoextra)
+library(gridExtra)
+#Importring the data
+US_data<- USArrests
+class(US_data)
+boxplot(US_data)
+US_data<-scale(US_data)
+boxplot(US_data)
+#Visualize the distance matrix using the function
+#get_dist and fviz_dist from the factoextra package
+distance <- get_dist(US_data)
+fviz_dist(distance, gradient=list(low="green",
+                             mid="white",
+                             high="red"))
+#k-Means Clustering
+k.2 <- kmeans(US_data, centers = 2, nstart = 25)
+str(k.2)
+k.2$centers
+fviz_cluster(k.2, data = US_data)
+#For k values equal to 3, 4, 5
+k.3 <- kmeans(US_data, centers = 3, nstart = 25)
+k.4 <- kmeans(US_data, centers = 4, nstart = 25)
+k.5 <- kmeans(US_data, centers = 5, nstart = 25)
+#Plots for comparison
+plot1<-fviz_cluster(k.2, geom="point",
+                    data = US_data)+ggtitle("k=2")
+plot2<-fviz_cluster(k.3, geom="point",
+                    data = US_data)+ggtitle("k=3")
+plot3<-fviz_cluster(k.4, geom="point",
+                    data = US_data)+ggtitle("k=4")
+plot4<-fviz_cluster(k.5, geom="point",
+                    data = US_data)+ggtitle("k=5")
+#gridplot
+grid.arrange(plot1, plot2, plot3, plot4, nrow=2)
+#Lets see the optimal value for k
+set.seed(2345)
+#function to compute total-within-cluster
+#sum of squares (wss)
+library(tidyverse)
+wss <- function(k){
+  kmeans(US_data, k, nstart = 10)$tot.withinss
+}
+k.values<- 1:15
+#Extract wss fro 1-15 clusters
+wss_values <- map_dbl(k.values, wss)
+plot(k.values, wss_values, type = "b", pch=19,
+     frame=FALSE, 
+     xlab = "Number of Clusters K",
+     ylab = "Total Within-Cluster Sum of Squares")
+
+#ggplot for wss vs clusters
+set.seed(2345)
+fviz_nbclust(US_data, kmeans, method = "wss")
+
+#Hierarchial Clustering
+hc.complete<- hclust(distance, method = "complete")
+plot(hc.complete)
