@@ -1,0 +1,69 @@
+###Linear Regression with K-Fold Cross Validation 
+
+data(cars)
+head(cars)
+str(cars)
+#Linearity of the data
+scatter.smooth(x=cars$speed, y=cars$dist,
+               main="Distance vs Speed")
+#Statistical representation of the data
+
+#boxplot(cars)
+boxplot(cars$speed, main="Speed",
+        sub=paste("Outlier rows: ", 
+                  boxplot.stats(cars$speed)$out))
+boxplot(cars$dist, main="Distance", sub=paste(
+  "Outlier rows: ", boxplot.stats(cars$dist)$out
+))        
+#Density Plot for all columns
+library(e1071)
+plot(density(cars$speed),
+     main = "Density Plot: Speed",
+     ylab = "Frequency", sub=paste("Skewness: ",
+      round(e1071::skewness(cars$speed), 2)) )
+polygon(density(cars$speed), col = "yellow")
+
+plot(density(cars$dist),
+    main = "Density Plot: Distance",
+    ylab = "Frequency", sub=paste("Skewness: ",
+    round(e1071::skewness(cars$dist), 2)))
+polygon(density(cars$dist), col = "blue")
+
+#Correlation between two columns
+cor(cars$speed, cars$dist)
+#Build a linear model
+linearMod <- lm(dist ~ speed, data = cars)
+linearMod
+#Create Training and Test datasets
+set.seed(2019)
+row_index <- sample(1:nrow(cars), 0.7*nrow(cars))
+trainingData <- cars[row_index, ] #training data
+testData <- cars[-row_index, ]  #test data
+#Build the linear model
+linMod <- lm(dist ~ speed, data = trainingData)
+linMod
+distPred <- predict(linMod, testData)
+distPred
+#Comparison between Actual Values and Predicted Values
+actuals_preds <- data.frame(cbind(actuals=testData$dist,
+                              predicteds=distPred))
+actuals_preds
+#Mean Absolute Percentage Error (MAPE)
+mape <- mean((abs(actuals_preds$predicteds-
+                   actuals_preds$actuals))/actuals_preds$actuals)
+mape
+
+##################################################
+###Cross Validation: "K-Fold"
+### K-Fold Cross Validation
+install.packages("DAAG")
+install.packages("lattice")
+library(lattice)
+library(DAAG)
+Cross_Validation <- suppressWarnings(CVlm(data = cars,
+                    form.lm = dist~speed, m=10,
+                    dots = FALSE, seed = 29,
+                    legend.pos = "topleft",
+                    printit = FALSE,
+  main = "Small symbols are predicted vs Bigger ones are
+  actuals" ))
