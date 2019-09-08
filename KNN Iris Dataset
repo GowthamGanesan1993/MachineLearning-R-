@@ -1,0 +1,48 @@
+###Building a KNN Machine Learning Model with the famous "iris" dataset which is built in R
+###Training 70% of the data and testing the rest of the data which is 30%
+###Data Analytics Class, May 2019, Lecturer, Dr. Amir Sajad Esmaeily
+--------------------------------------------------------------------------------------------------------
+
+install.packages("dplyr")
+install.packages("class")
+install.packages("repr")
+install.packages("kknn")
+#If you dont have the package "repr" then you need to install it first
+
+data(iris)
+head(iris)
+str(iris)
+table(iris$Species)
+library(ggplot2)
+library(repr)
+options(repr.plot.width=5, repr.plot.height=4)
+#set the initial plot area dimensions
+ggplot(iris, aes(Sepal.Width, Sepal.Length,)) + geom_point(aes(color=Species))
+ggplot(iris, aes(Petal.Width, Sepal.Length,)) + geom_point(aes(color=Species))
+
+###Scaling Step
+iris[,c('Sepal.Width', 'Sepal.Length', 'Petal.Width', 'Petal.Length')]=
+  lapply(iris[,c('Sepal.Width', 'Sepal.Length', 'Petal.Width', 'Petal.Length')], scale)
+print(summary(iris))
+print(sapply(iris[,c('Sepal.Width', 'Sepal.Length', 'Petal.Width', 'Petal.Length')], sd))
+
+###Splitting the detaset into a training and test set by Bernoulli sampling
+library(dplyr)
+set.seed(2345)
+train.iris=sample_frac(iris, 0.7)
+test.iris=iris[-as.numeric(rownames(train.iris)),] #Use as.numeric because rownames() returnes characters
+
+###Compute k=3 Nearest Neibour Model
+library(kknn)
+knn.3 = kknn(Species ~ ., train=train.iris, test=test.iris, k=3)
+summary(knn.3)
+
+###Testing Step
+test.iris$predicted = predict(knn.3)
+test.iris$correct = test.iris$Species == test.iris$predicted
+100*sum(test.iris$correct / nrow(test.iris))
+
+###Plot the results
+ggplot(test.iris, aes(Sepal.Width, Sepal.Length,)) + geom_point(aes(color = predicted, shape = correct))
+ggplot(test.iris, aes(Petal.Width, Sepal.Length,)) + geom_point(aes(color = predicted, shape = correct))
+
