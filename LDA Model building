@@ -1,0 +1,37 @@
+###Building a Linear Discriminant Analysis Machine Learning Model with the famous "iris" dataset which is built in R
+###Data Analytics Class, Lecturer, Dr. Amir Sajad Esmaeily
+--------------------------------------------------------------------------------------------------------
+install.packages("MASS")
+data("iris")
+library(MASS)
+iris #Present iris data
+x1 = iris$Sepal.Length #Sepal.Length will be treated as independent variable
+x2 = iris$Sepal.Width #Sepal.Width will be treated as independent variable
+x3 = iris$Petal.Length #Petal.Length will be treated as independent variable
+x4 = iris$Petal.Width #Petal.Width will be treated as dependent variable
+x1
+x2
+x3
+x4
+summary(x1)
+summary(x2)
+summary(x3)
+summary(x4)
+install.packages("psych")
+library(psych) #Load package psych to use function describeBy
+describeBy(iris$Sepal.Length, iris$Species) 
+describeBy(iris$Sepal.Width, iris$Species)
+describeBy(iris$Petal.Length, iris$Species)
+describeBy(iris$Petal.Width, iris$Species)
+
+#Perform Linear Discriminant Analysis (LDA) with Iris Data
+library(MASS) #Load package 'MASS' to perform LDA
+fit.LDA = lda( Species ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, iris)
+fit.LDA
+
+#Perform classification
+fit.LDA.C = predict(fit.LDA, newdata=iris[,c(1,2,3,4)])$class
+fit.LDA.C
+
+#Determine misclassification: Confusion Matrix
+table(iris[,5],fit.LDA.C)
