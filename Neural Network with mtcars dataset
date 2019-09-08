@@ -1,0 +1,55 @@
+## Fit neural network 
+
+# install library
+install.packages('neuralnet')
+
+# load library
+library(neuralnet)
+
+
+# Read the Data
+data = mtcars
+
+# Random sampling
+samplesize = 0.70 * nrow(data)
+set.seed(80)
+index = sample( seq_len ( nrow ( data ) ), size = samplesize )
+
+# Create training and test set
+datatrain = data[ index, ]
+datatest = data[ -index, ]
+
+
+## Scale data for neural network
+
+max = apply(data , 2 , max)
+min = apply(data, 2 , min)
+scaled = as.data.frame(scale(data, center = min, scale = max - min))
+
+
+
+# creating training and test set
+trainNN = scaled[index , ]
+testNN = scaled[-index , ]
+head(trainNN)
+# fit neural network
+set.seed(2)
+NN = neuralnet(cyl ~ disp + hp + drat, trainNN, hidden = 3 , linear.output = T )
+
+# plot neural network
+plot(NN)
+####################################################################################
+## Prediction cyl using neural network in the mtcars 
+
+predict_testNN = compute(NN, testNN[,c(4:6)])
+predict_testNN = (predict_testNN$net.result * (max(data$cyl) - min(data$cyl))) + min(data$cyl)
+
+plot(datatest$cyl, predict_testNN, col='blue', pch=16, ylab = "predicted cyl  NN", xlab = "real cyl")
+abline(0,1)
+
+
+# Calculate Root Mean Square Error (RMSE)
+RMSE.NN = sqrt(sum((datatest$cyl - predict_testNN)^2) / nrow(datatest) )
+RMSE.NN
+#################################################################################
+#################################################################################
