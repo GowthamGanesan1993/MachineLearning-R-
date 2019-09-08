@@ -1,0 +1,58 @@
+#Getting started with Naive Bayes
+#Install the package
+#install.packages("e1071")
+#Loading the library
+library(e1071)
+
+#Next load the Titanic dataset
+data("Titanic")
+
+
+#Save into a data frame and view it
+Titanic_df=as.data.frame(Titanic)
+View(Titanic_df)
+head(Titanic_df)
+str(Titanic_df)
+
+#Creating data from table
+repeating_sequence=rep.int(seq_len(nrow(Titanic_df)), Titanic_df$Freq) 
+#This will repeat each combination equal to the frequency of each combination
+
+#Create the dataset by row repetition created
+Titanic_dataset=Titanic_df[repeating_sequence,]
+
+#We no longer need the frequency, drop the feature
+Titanic_dataset$Freq=NULL
+head(Titanic_dataset)
+
+plot(Titanic_dataset$Class,Titanic_dataset$Survived, xlab = "Class", ylab = "Survived")
+plot(Titanic_dataset$Sex, Titanic_dataset$Survived, xlab = "Sex", ylab = "Survived")
+plot(Titanic_dataset$Age, Titanic_dataset$Survived, xlab = "Age", ylab = "Survived")
+
+c_survived = table(Titanic_dataset$Survived, Titanic_dataset$Class)
+barplot(as.matrix(c_survived), legend = c("No","Yes"))
+
+s_survived = table(Titanic_dataset$Survived, Titanic_dataset$Sex)
+barplot(as.matrix(s_survived), legend = c("No","Yes"))
+
+a_survived = table(Titanic_dataset$Survived, Titanic_dataset$Age)
+barplot(as.matrix(a_survived), legend = c("No","Yes"))
+
+set.seed(1980)
+n = nrow(Titanic_dataset)
+indexes = sample(n,n*0.8)
+training = Titanic_dataset[indexes,]
+testing = Titanic_dataset[-indexes,]
+
+#Fitting the Naive Bayes model
+Naive_Bayes_Model=naiveBayes(Survived ~., data=training)
+
+#What does the model say? Print the model summary
+Naive_Bayes_Model
+
+#Prediction on the dataset
+NB_Predictions=predict(Naive_Bayes_Model,testing)
+
+#Confusion matrix to check accuracy
+tab = table(NB_Predictions,testing$Survived)
+confusionMatrix(tab)
