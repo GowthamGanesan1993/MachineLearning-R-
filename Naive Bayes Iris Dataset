@@ -1,0 +1,41 @@
+#Naive Bayes Classifier in R
+#IRIS Dataset
+#=================================================
+data(iris)
+head(iris)
+str(iris)
+table(iris$Species)
+library(ggplot2)
+library(repr)
+library(caret)
+
+# Using klaR for Naive Bayes
+library(klaR)
+
+set.seed(2016)
+n = nrow(iris)
+indexes = sample(n,n*0.7)
+training = iris[indexes,]
+testing = iris[-indexes,]
+
+nb_mod <- NaiveBayes(Species ~ ., data=training)
+pred <- predict(nb_mod, testing)
+
+# Confusion Matrix
+tab <- table(pred$class, testing$Species)
+confusionMatrix(tab)  
+
+# Plot density of each feature using nb_mod
+opar = par(mfrow=c(2, 2), mar=c(4,0,0,0))
+plot(nb_mod, main="")  
+par(opar)
+
+# Plot the Confusion Matrix
+testing$pred <- pred$class
+ggplot(testing, aes(Species, pred, color = Species)) +
+  geom_jitter(width = 0.2, height = 0.1, size=2) +
+  labs(title="Confusion Matrix", 
+       subtitle="Predicted vs. Observed from Iris dataset", 
+       y="Predicted", 
+       x="Truth",
+       caption="Naive Bayes, DBS Machine Learning")
